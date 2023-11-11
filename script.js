@@ -20,22 +20,94 @@ let gameboard = (function() {
 
    const getBoard = () => board;
 
-   const placeToken = (column, row, player) => {
-    //Determines where current player places their token
-
+ //Where the player places their token ("X" or "O")
+   const placeToken = (row, column, player) => {
+    //Loop through the board and determine if the cell contains an X or O
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < columns; j++) {
+            let cell = board[i][j]
+            if (board[i][j].getValue() === "X" || board[i][j].getValue() === "O") {
+                return console.log("This spot is taken, choose a different spot.")
+            }  else {
+                board[row][column].addToken(player);
+                return;
+            }
+        }
+    }
+    //Spot must be available, add players token.
    }
 
    const printBoard = () => {
     const printedBoard = board.map((row) => row.map((cell) => cell.getValue()))
     console.log(printedBoard);
+    return printedBoard;
    }
+   
 
    return { getBoard, placeToken, printBoard };
 
 })();
 
+//Game controller
+let gameController = (function() {
+
+    let playerOne = createPlayer("Player One");
+    let playerTwo = createPlayer("Player Two");
+
+    const players = [
+       {
+        name: playerOne.playerName,
+        token: "X"
+       },
+       {
+        name: playerTwo.playerName,
+        token: "O"
+       }
+    ];
+
+    let currentPlayer = players[0];
+
+    const getCurrentPlayer = () => currentPlayer
+
+    const printNewRound = () => {
+        gameboard.printBoard();
+        console.log(`${getCurrentPlayer().name}'s turn`)
+    }
+
+    const switchPlayer = () => {
+        currentPlayer = currentPlayer = players[0] ? players[1] : players[0];
+    }
+
+    const playRound = (row, column) => {
+        console.log(`${getCurrentPlayer().name}'s marked their spot!`)
+        // gameboard.placeToken(row, column, getCurrentPlayer().token);
+
+        determineWinner();
+        switchPlayer();
+        printNewRound();
+    };
+
+    printNewRound();
+
+    const determineWinner = () => {
+        let board = gameboard.printBoard();
+
+        // console.log(board);
+        
+    }
+
+    return {
+        playRound,
+        getCurrentPlayer
+    }
+
+    //render
+    //reset game
+    //winner
+})();
+
 function Cell() {
-    let value = " "
+    let value = 0;
 
     const getValue = () => value;
 
@@ -46,39 +118,13 @@ function Cell() {
     return { getValue, addToken }
 }
 
-//Game controller
-let gameController = (function() {
-
-    const players = [
-       {
-        name: "Player One",
-        token: "X"
-       },
-       {
-        name: "Player Two",
-        token: "O"
-       }
-    ];
-
-
-    //render
-    //reset game
-    //winner
-
-})();
-
 //Factory function to create players
 function createPlayer(name) {
+
     const playerName = name;
 
 
     return { playerName }
 }
 
-let playerOne = createPlayer("zack")
-let playerTwo = createPlayer("test")
-console.log(playerOne.playerName, playerTwo.playerName)
 
-
-
-console.log(gameboard);
