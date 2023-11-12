@@ -22,19 +22,14 @@ let gameboard = (function() {
 
  //Where the player places their token ("X" or "O")
    const placeToken = (row, column, player) => {
-    //Loop through the board and determine if the cell contains an X or O
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < columns; j++) {
-            let cell = board[i][j]
-            if (board[i][j].getValue() === "X" || board[i][j].getValue() === "O") {
-                return console.log("This spot is taken, choose a different spot.")
-            }  else {
-                board[row][column].addToken(player);
-                return;
-            }
-        }
+   
+    //We know where the player wants to mark their spot via row and column params.
+    //This means we can search the matrix to the spot the player wants to mark
+    
+    if (board[row][column].getValue() === "X" || board[row][column].getValue()) {
+       return console.log("Spot taken")
     }
-    //Spot must be available, add players token.
+    board[row][column].addToken(player);
    }
 
    const printBoard = () => {
@@ -88,13 +83,35 @@ let gameController = (function() {
     };
 
     printNewRound();
+    
 
     const determineWinner = () => {
-        let board = gameboard.printBoard();
+        const winConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [2, 4, 6],
+            [0, 4, 8],
+        ]
 
-        // console.log(board);
-        
+        let flatBoard = gameboard.printBoard().flat();
+        console.log(flatBoard);
+
+        const checkForWin = (marker) => {
+            return winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
+        }
+
+        if (checkForWin("O")) {
+            return console.log("WINNER")
+        }
+
+        console.log(checkForWin("O"));
     }
+
+   
 
     return {
         playRound,
