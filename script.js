@@ -1,8 +1,3 @@
-//Logic 
-    //When game is over
-    //All winning 3 in-a-row and ties
-        
-
 //Gameboard Object
 let gameboard = (function() {
    let rows = 3;
@@ -15,21 +10,18 @@ let gameboard = (function() {
     for (let j = 0; j < columns; j++) {
         board[i].push(Cell());
     }
-
    }
 
    const getBoard = () => board;
 
  //Where the player places their token ("X" or "O")
-   const placeToken = (row, column, player) => {
-   
+   const placeMarker = (row, column, player) => {
     //We know where the player wants to mark their spot via row and column params.
     //This means we can search the matrix to the spot the player wants to mark
-    
-    if (board[row][column].getValue() === "X" || board[row][column].getValue()) {
+    if (board[row][column].getValue() === "X" || board[row][column].getValue() === "O") {
        return console.log("Spot taken")
     }
-    board[row][column].addToken(player);
+    board[row][column].addMarker(player);
    }
 
    const printBoard = () => {
@@ -38,25 +30,25 @@ let gameboard = (function() {
     return printedBoard;
    }
    
-
-   return { getBoard, placeToken, printBoard };
+   return { getBoard, placeMarker, printBoard };
 
 })();
 
-//Game controller
-let gameController = (function() {
 
-    let playerOne = createPlayer("Player One");
-    let playerTwo = createPlayer("Player Two");
+
+//Game Controller
+function Gamecontroller() {
+    let playerOne = createPlayer("Zack")
+    let playerTwo = createPlayer("Steve")
 
     const players = [
        {
         name: playerOne.playerName,
-        token: "X"
+        marker: "X"
        },
        {
         name: playerTwo.playerName,
-        token: "O"
+        marker: "O"
        }
     ];
 
@@ -64,28 +56,7 @@ let gameController = (function() {
 
     const getCurrentPlayer = () => currentPlayer
 
-    const printNewRound = () => {
-        gameboard.printBoard();
-        console.log(`${getCurrentPlayer().name}'s turn`)
-    }
-
-    const switchPlayer = () => {
-        currentPlayer = currentPlayer = players[0] ? players[1] : players[0];
-    }
-
-    const playRound = (row, column) => {
-        console.log(`${getCurrentPlayer().name}'s marked their spot!`)
-        // gameboard.placeToken(row, column, getCurrentPlayer().token);
-
-        determineWinner();
-        switchPlayer();
-        printNewRound();
-    };
-
-    printNewRound();
-    
-
-    const determineWinner = () => {
+    const checkForWin = (marker) => {
         const winConditions = [
             [0, 1, 2],
             [3, 4, 5],
@@ -98,50 +69,111 @@ let gameController = (function() {
         ]
 
         let flatBoard = gameboard.printBoard().flat();
-        console.log(flatBoard);
 
-        const checkForWin = (marker) => {
-            return winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
-        }
-
-        if (checkForWin("O")) {
-            return console.log("WINNER")
-        }
-
-        console.log(checkForWin("O"));
+        return winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
     }
 
-   
+    const printNewRound = () => {
+        gameboard.printBoard();
+        console.log(`${getCurrentPlayer().name}'s turn`)
+    }
+
+    const switchPlayer = () => {
+        // currentPlayer = currentPlayer = players[0] ? players[1] : players[0];
+        if (currentPlayer === players[0]) {
+            currentPlayer = players[1]
+        } else if (currentPlayer === players[1]) {
+            currentPlayer = players[0]
+        }
+    }
+
+    const playRound = (row, column) => {
+        debugger;
+        const mark = getCurrentPlayer().marker;
+        // console.log(`${getCurrentPlayer().name}'s marked their spot!`)
+        gameboard.placeMarker(row, column, mark);
+
+        checkForWin(mark);
+        console.log(currentPlayer)
+        switchPlayer();
+        console.log("after switch")
+        console.log(currentPlayer);
+        printNewRound();
+    };
+
+    printNewRound();
 
     return {
         playRound,
         getCurrentPlayer
     }
-
-    //render
-    //reset game
-    //winner
-})();
+}
 
 function Cell() {
-    let value = 0;
+    let value = "";
 
     const getValue = () => value;
 
-    const addToken = (player) => {
+    const addMarker = (player) => {
         value = player
     }
 
-    return { getValue, addToken }
+    return { getValue, addMarker }
 }
 
-//Factory function to create players
+
 function createPlayer(name) {
 
     const playerName = name;
 
-
     return { playerName }
 }
 
+function Screencontroller() {
 
+    const game = Gamecontroller();
+    const boardDiv = document.querySelector(".board");
+
+    const updateScreen = () => {
+
+        boardDiv.textContent = "";
+
+        const board = gameboard.getBoard();
+        const currentPlayer = game.getCurrentPlayer();
+
+        board.forEach((row, index)=> {
+            const rowDiv = document.createElement("div");
+            rowDiv.classList.add("board-row");
+            rowDiv.dataset.row = index
+            boardDiv.appendChild(rowDiv)
+            row.forEach((cell, index) => {
+                const cellDiv = document.createElement("div");
+                // const markerDiv = document.createElement("div");
+                cellDiv.classList.add('cell');
+                cellDiv.dataset.column = index;
+                cellDiv.textContent = cell.getValue();
+
+                rowDiv.appendChild(cellDiv);
+            })
+        })
+    }
+
+    const clickHandeler = (e) => {
+        const column = e.target.dataset.column;
+        const row = e.target.parentNode.dataset.row;
+        
+        console.log(column);
+
+        game.playRound(row, column);
+        updateScreen();
+    }
+
+    boardDiv.addEventListener("click", clickHandeler)
+
+
+
+    updateScreen();
+
+}
+
+Screencontroller();
