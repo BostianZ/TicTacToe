@@ -38,25 +38,35 @@ let gameboard = (function() {
 
 //Game Controller
 function Gamecontroller() {
-    let playerOne = createPlayer("Zack")
-    let playerTwo = createPlayer("Steve")
+    const form = document.querySelector("form");
+    const players = [];
+    let currentPlayer; 
 
-    const players = [
-       {
-        name: playerOne.playerName,
-        marker: "X"
-       },
-       {
-        name: playerTwo.playerName,
-        marker: "O"
-       }
-    ];
 
-    let currentPlayer = players[0];
+    const createPlayer = (name, marker) => {
+        let playerName =  name;
+        let playerMarker = marker
+        return { playerName, playerMarker }
+    }
 
-    const getCurrentPlayer = () => currentPlayer
+    const getCurrentPlayer = () => currentPlayer;
+
+    const switchPlayer = () => {
+        // currentPlayer = currentPlayer = players[0] ? players[1] : players[0];
+        if (currentPlayer === players[0]) {
+            currentPlayer = players[1]
+        } else if (currentPlayer === players[1]) {
+            currentPlayer = players[0]
+        }
+    }
+    
+    const printNewRound = () => {
+        gameboard.printBoard();
+        // console.log(`${getCurrentPlayer().name}'s turn`)
+    }
 
     const checkForWin = (marker) => {
+        const winDiv = document.querySelector(".winner");
         const winConditions = [
             [0, 1, 2],
             [3, 4, 5],
@@ -70,42 +80,44 @@ function Gamecontroller() {
 
         let flatBoard = gameboard.printBoard().flat();
 
-        return winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
-    }
+        let win = winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
 
-    const printNewRound = () => {
-        gameboard.printBoard();
-        console.log(`${getCurrentPlayer().name}'s turn`)
-    }
-
-    const switchPlayer = () => {
-        // currentPlayer = currentPlayer = players[0] ? players[1] : players[0];
-        if (currentPlayer === players[0]) {
-            currentPlayer = players[1]
-        } else if (currentPlayer === players[1]) {
-            currentPlayer = players[0]
+        if (win) {
+            winDiv.textContent = `${getCurrentPlayer().playerName}`
+            // console.log(`${getCurrentPlayer().name} wins!`)
         }
     }
 
     const playRound = (row, column) => {
-        debugger;
-        const mark = getCurrentPlayer().marker;
-        // console.log(`${getCurrentPlayer().name}'s marked their spot!`)
+        // console.log("Players", players[0])
+        // debugger;
+        const mark = getCurrentPlayer().playerMarker;
+    
         gameboard.placeMarker(row, column, mark);
 
         checkForWin(mark);
-        console.log(currentPlayer)
         switchPlayer();
-        console.log("after switch")
-        console.log(currentPlayer);
         printNewRound();
     };
+
+    const start = (e) => {
+        e.preventDefault();
+        const playerOne = createPlayer(document.querySelector(".player-one").value, "X");
+        const playerTwo = createPlayer(document.querySelector(".player-two").value, "O");
+        // debugger;
+        players.push(playerOne, playerTwo);
+        // console.log(players);
+        currentPlayer = players[0];
+        form.reset();
+    }
+
+    form.addEventListener("submit", start)
 
     printNewRound();
 
     return {
         playRound,
-        getCurrentPlayer
+        getCurrentPlayer,
     }
 }
 
@@ -122,13 +134,6 @@ function Cell() {
 }
 
 
-function createPlayer(name) {
-
-    const playerName = name;
-
-    return { playerName }
-}
-
 function Screencontroller() {
 
     const game = Gamecontroller();
@@ -137,9 +142,7 @@ function Screencontroller() {
     const updateScreen = () => {
 
         boardDiv.textContent = "";
-
         const board = gameboard.getBoard();
-        const currentPlayer = game.getCurrentPlayer();
 
         board.forEach((row, index)=> {
             const rowDiv = document.createElement("div");
@@ -158,22 +161,17 @@ function Screencontroller() {
         })
     }
 
-    const clickHandeler = (e) => {
+    const boardClickHandler = (e) => {
         const column = e.target.dataset.column;
         const row = e.target.parentNode.dataset.row;
-        
-        console.log(column);
-
+  
         game.playRound(row, column);
         updateScreen();
     }
 
-    boardDiv.addEventListener("click", clickHandeler)
-
-
+    boardDiv.addEventListener("click", boardClickHandler)
 
     updateScreen();
-
 }
 
 Screencontroller();
