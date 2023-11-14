@@ -3,6 +3,7 @@ let gameboard = (function() {
    let rows = 3;
    let columns = 3;
    let board = [];
+  
 
    for (let i = 0; i < rows; i++) {
     //creation of each row
@@ -34,8 +35,6 @@ let gameboard = (function() {
 
 })();
 
-
-
 //Game Controller
 function Gamecontroller() {
     const form = document.querySelector("form");
@@ -60,13 +59,14 @@ function Gamecontroller() {
         }
     }
     
-    const printNewRound = () => {
-        gameboard.printBoard();
-        // console.log(`${getCurrentPlayer().name}'s turn`)
-    }
+    // const printNewRound = () => {
+    //     gameboard.printBoard();
+    //     // console.log(`${getCurrentPlayer().name}'s turn`)
+    // }
 
     const checkForWin = (marker) => {
         const winDiv = document.querySelector(".winner");
+
         const winConditions = [
             [0, 1, 2],
             [3, 4, 5],
@@ -83,41 +83,42 @@ function Gamecontroller() {
         let win = winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
 
         if (win) {
-            winDiv.textContent = `${getCurrentPlayer().playerName}`
-            // console.log(`${getCurrentPlayer().name} wins!`)
+            console.log(`${getCurrentPlayer().playerName} WINS!`)
         }
     }
 
     const playRound = (row, column) => {
-        // console.log("Players", players[0])
-        // debugger;
+        console.log(currentPlayer);
         const mark = getCurrentPlayer().playerMarker;
-    
         gameboard.placeMarker(row, column, mark);
 
         checkForWin(mark);
         switchPlayer();
-        printNewRound();
+        // printNewRound();
     };
 
     const start = (e) => {
         e.preventDefault();
+
+        if (players.length >= 2) {
+            return console.log("Already players playing")
+        } 
+
         const playerOne = createPlayer(document.querySelector(".player-one").value, "X");
         const playerTwo = createPlayer(document.querySelector(".player-two").value, "O");
-        // debugger;
         players.push(playerOne, playerTwo);
-        // console.log(players);
         currentPlayer = players[0];
         form.reset();
     }
 
     form.addEventListener("submit", start)
 
-    printNewRound();
+    // printNewRound();
 
     return {
         playRound,
         getCurrentPlayer,
+        players
     }
 }
 
@@ -138,9 +139,18 @@ function Screencontroller() {
 
     const game = Gamecontroller();
     const boardDiv = document.querySelector(".board");
+    const currentPlayerDiv = document.querySelector(".current-player");
 
+   
+    
     const updateScreen = () => {
 
+        if (game.players.length === 0) {
+            currentPlayerDiv.textContent = "Please choose your names!";
+        } else {
+            currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}`
+        }
+        
         boardDiv.textContent = "";
         const board = gameboard.getBoard();
 
@@ -151,7 +161,6 @@ function Screencontroller() {
             boardDiv.appendChild(rowDiv)
             row.forEach((cell, index) => {
                 const cellDiv = document.createElement("div");
-                // const markerDiv = document.createElement("div");
                 cellDiv.classList.add('cell');
                 cellDiv.dataset.column = index;
                 cellDiv.textContent = cell.getValue();
@@ -161,6 +170,7 @@ function Screencontroller() {
         })
     }
 
+   
     const boardClickHandler = (e) => {
         const column = e.target.dataset.column;
         const row = e.target.parentNode.dataset.row;
@@ -172,6 +182,9 @@ function Screencontroller() {
     boardDiv.addEventListener("click", boardClickHandler)
 
     updateScreen();
+
 }
 
+
+  
 Screencontroller();
