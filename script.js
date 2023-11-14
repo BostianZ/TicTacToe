@@ -38,7 +38,7 @@ let gameboard = (function() {
 //Game Controller
 function Gamecontroller() {
     const form = document.querySelector("form");
-    const players = [];
+    let players = [];
     let currentPlayer; 
 
 
@@ -80,11 +80,8 @@ function Gamecontroller() {
 
         let flatBoard = gameboard.printBoard().flat();
 
-        let win = winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
+        return win = winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
 
-        if (win) {
-            console.log(`${getCurrentPlayer().playerName} WINS!`)
-        }
     }
 
     const playRound = (row, column) => {
@@ -99,11 +96,11 @@ function Gamecontroller() {
 
     const start = (e) => {
         e.preventDefault();
+        const screenCtrl = Screencontroller();
 
         if (players.length >= 2) {
             return console.log("Already players playing")
         } 
-
         const playerOne = createPlayer(document.querySelector(".player-one").value, "X");
         const playerTwo = createPlayer(document.querySelector(".player-two").value, "O");
         players.push(playerOne, playerTwo);
@@ -118,6 +115,7 @@ function Gamecontroller() {
     return {
         playRound,
         getCurrentPlayer,
+        checkForWin,
         players
     }
 }
@@ -140,17 +138,21 @@ function Screencontroller() {
     const game = Gamecontroller();
     const boardDiv = document.querySelector(".board");
     const currentPlayerDiv = document.querySelector(".current-player");
-
    
-    
     const updateScreen = () => {
 
         if (game.players.length === 0) {
             currentPlayerDiv.textContent = "Please choose your names!";
+            
         } else {
-            currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}`
+ 
+            if (game.checkForWin(game.getCurrentPlayer().playerMarker)) {
+                currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}'s WINS!`
+            } else {
+                currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}'s turn!`
+            }
         }
-        
+
         boardDiv.textContent = "";
         const board = gameboard.getBoard();
 
