@@ -35,14 +35,16 @@ let gameboard = (function() {
         //Board contains cell objects with getValue and addMarker methods
         //We need to change the values within the board and then those values ought
         //to change within the screencontroller
+       
         let board = gameboard.getBoard();
-        let newBoard = board.forEach((cell, index) => {
-            cell[index] = Cell();
+        let newBoard = board.forEach(row => {
+            row.forEach((cell, index) => {
+                cell[index] = Cell();
+            })
         })
 
-        console.log(newBoard);
+        console.log("NEW BOARD", newBoard);
         return newBoard;
-    
     }
 
 
@@ -52,8 +54,9 @@ let gameboard = (function() {
 })();
 
 //Game Controller
-function Gamecontroller() {
+const gameController = (function() {
     const form = document.querySelector("form");
+    const startBtn = document.querySelector(".btn-start");
     const restartBtn = document.querySelector(".btn-restart");
     let players = [];
     let currentPlayer; 
@@ -103,6 +106,7 @@ function Gamecontroller() {
 
     const playRound = (row, column) => {
         console.log(currentPlayer);
+    
         const mark = getCurrentPlayer().playerMarker;
         gameboard.placeMarker(row, column, mark);
 
@@ -113,22 +117,19 @@ function Gamecontroller() {
 
     const start = (e) => {
         e.preventDefault();
-        const screenCtrl = Screencontroller();
-
         if (players.length >= 2) {
             return console.log("Already players playing")
         } 
         const playerOne = createPlayer(document.querySelector(".player-one").value, "X");
         const playerTwo = createPlayer(document.querySelector(".player-two").value, "O");
+
         players.push(playerOne, playerTwo);
         currentPlayer = players[0];
-        console.log(players)
+        console.log("PLAYERS", players)
         form.reset();
-        // screenCtrl.updateCurrentPlayer();
-
     }
 
-    form.addEventListener("submit", start)
+    startBtn.addEventListener("click", start)
     restartBtn.addEventListener("click", gameboard.restartBoard);
 
     // printNewRound();
@@ -139,15 +140,15 @@ function Gamecontroller() {
         checkForWin,
         players
     }
-}
+})();
 
 function Cell() {
     let value = "";
 
     const getValue = () => value;
 
-    const addMarker = (player) => {
-        value = player
+    const addMarker = (mark) => {
+        value = mark
     }
 
     return { getValue, addMarker }
@@ -156,26 +157,23 @@ function Cell() {
 
 function Screencontroller() {
 
-    const game = Gamecontroller();
+    //We want to check that the user enters names before they can start the game
+    //People array is 
+    
+    //We want to display the current players name when the game STARTS
+
+    //We then update the currentplayer based on whos turn it is.
+
+    //If a player whens we update the current screen with the winner.
+
+    // const game = Gamecontroller();
     const boardDiv = document.querySelector(".board");
     const currentPlayerDiv = document.querySelector(".current-player");
 
     const updateScreen = () => {
-
         boardDiv.textContent = "";
         const board = gameboard.getBoard();
-
-        if (game.players.length === 0) {
-            currentPlayerDiv.textContent = "Please choose your names!";
-            } else {
-         
-                if (game.checkForWin(game.getCurrentPlayer().playerMarker)) {
-                    currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}'s WINS!`
-                } else {
-                   currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}'s turn!`
-          }
-        }
-
+     
         board.forEach((row, index)=> {
             const rowDiv = document.createElement("div");
             rowDiv.classList.add("board-row");
@@ -196,14 +194,15 @@ function Screencontroller() {
     const boardClickHandler = (e) => {
         const column = e.target.dataset.column;
         const row = e.target.parentNode.dataset.row;
-  
-        game.playRound(row, column);
+        gameController.playRound(row, column);
         updateScreen();
     }
 
     boardDiv.addEventListener("click", boardClickHandler)
 
     updateScreen();
+
+    return { updateScreen }
 
 }
 
