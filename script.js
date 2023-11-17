@@ -117,6 +117,7 @@ const gameController = (function() {
 
     const start = (e) => {
         e.preventDefault();
+        const screenCtrl = Screencontroller();
         if (players.length >= 2) {
             return console.log("Already players playing")
         } 
@@ -127,6 +128,7 @@ const gameController = (function() {
         currentPlayer = players[0];
         console.log("PLAYERS", players)
         form.reset();
+        screenCtrl.updateScreen();
     }
 
     startBtn.addEventListener("click", start)
@@ -173,6 +175,12 @@ function Screencontroller() {
     const updateScreen = () => {
         boardDiv.textContent = "";
         const board = gameboard.getBoard();
+
+        console.log(gameController.players);
+        if (gameController.players.length !== 0) {
+            currentPlayerDiv.textContent = `${gameController.getCurrentPlayer().playerName}`;
+        }
+
      
         board.forEach((row, index)=> {
             const rowDiv = document.createElement("div");
