@@ -31,13 +31,30 @@ let gameboard = (function() {
     return printedBoard;
    }
    
-   return { getBoard, placeMarker, printBoard };
+   const restartBoard = () => {
+        //Board contains cell objects with getValue and addMarker methods
+        //We need to change the values within the board and then those values ought
+        //to change within the screencontroller
+        let board = gameboard.getBoard();
+        let newBoard = board.forEach((cell, index) => {
+            cell[index] = Cell();
+        })
+
+        console.log(newBoard);
+        return newBoard;
+    
+    }
+
+
+   return { getBoard, placeMarker, printBoard, restartBoard };
+
 
 })();
 
 //Game Controller
 function Gamecontroller() {
     const form = document.querySelector("form");
+    const restartBtn = document.querySelector(".btn-restart");
     let players = [];
     let currentPlayer; 
 
@@ -105,10 +122,14 @@ function Gamecontroller() {
         const playerTwo = createPlayer(document.querySelector(".player-two").value, "O");
         players.push(playerOne, playerTwo);
         currentPlayer = players[0];
+        console.log(players)
         form.reset();
+        // screenCtrl.updateCurrentPlayer();
+
     }
 
     form.addEventListener("submit", start)
+    restartBtn.addEventListener("click", gameboard.restartBoard);
 
     // printNewRound();
 
@@ -138,23 +159,22 @@ function Screencontroller() {
     const game = Gamecontroller();
     const boardDiv = document.querySelector(".board");
     const currentPlayerDiv = document.querySelector(".current-player");
-   
-    const updateScreen = () => {
 
-        if (game.players.length === 0) {
-            currentPlayerDiv.textContent = "Please choose your names!";
-            
-        } else {
- 
-            if (game.checkForWin(game.getCurrentPlayer().playerMarker)) {
-                currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}'s WINS!`
-            } else {
-                currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}'s turn!`
-            }
-        }
+    const updateScreen = () => {
 
         boardDiv.textContent = "";
         const board = gameboard.getBoard();
+
+        if (game.players.length === 0) {
+            currentPlayerDiv.textContent = "Please choose your names!";
+            } else {
+         
+                if (game.checkForWin(game.getCurrentPlayer().playerMarker)) {
+                    currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}'s WINS!`
+                } else {
+                   currentPlayerDiv.textContent = `${game.getCurrentPlayer().playerName}'s turn!`
+          }
+        }
 
         board.forEach((row, index)=> {
             const rowDiv = document.createElement("div");
@@ -188,5 +208,4 @@ function Screencontroller() {
 }
 
 
-  
 Screencontroller();
