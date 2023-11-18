@@ -136,9 +136,8 @@ const gameController = (function() {
     const restartGame  = () => {
         const screenCtrl = Screencontroller();
         const startBtn = document.querySelector(".btn-start");
-        while (players.length > 0) {
-            players.pop();
-        }
+        players = [];
+        currentPlayer = players[0];
         gameboard.createBoard();
         startBtn.hidden = false;
         console.log(players);
@@ -148,8 +147,6 @@ const gameController = (function() {
 
     form.addEventListener("submit", start)
     restartBtn.addEventListener("click", restartGame);
-
-    // printNewRound();
 
     return {
         playRound,
@@ -186,7 +183,6 @@ function Screencontroller() {
 
         if (currentPlayer === undefined) {
             currentPlayerDiv.textContent = "Enter your player names!"
-        
         } else if (currentPlayer && gameController.checkForWin(currentPlayer.playerMarker)) {
              currentPlayerDiv.textContent = `${currentPlayer.playerName} WINS!`;
         } else {
