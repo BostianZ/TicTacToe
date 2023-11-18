@@ -106,7 +106,6 @@ const gameController = (function() {
 
     const playRound = (row, column) => {
         console.log(currentPlayer);
-    
         const mark = getCurrentPlayer().playerMarker;
         gameboard.placeMarker(row, column, mark);
 
@@ -176,9 +175,12 @@ function Screencontroller() {
         boardDiv.textContent = "";
         const board = gameboard.getBoard();
 
-        console.log(gameController.players);
         if (gameController.players.length !== 0) {
-            currentPlayerDiv.textContent = `${gameController.getCurrentPlayer().playerName}`;
+            currentPlayerDiv.textContent = `${gameController.getCurrentPlayer().playerName}'s turn!`;
+        } 
+    
+        if (gameController.checkForWin(gameController.getCurrentPlayer.playerMarker)) {
+            currentPlayerDiv.textContent = `${gameController.getCurrentPlayer().playerName}'s WINS!`;
         }
 
      
@@ -193,6 +195,8 @@ function Screencontroller() {
                 cellDiv.dataset.column = index;
                 cellDiv.textContent = cell.getValue();
 
+                cellDiv.addEventListener("click", boardClickHandler)
+
                 rowDiv.appendChild(cellDiv);
             })
         })
@@ -206,7 +210,7 @@ function Screencontroller() {
         updateScreen();
     }
 
-    boardDiv.addEventListener("click", boardClickHandler)
+    // boardDiv.addEventListener("click", boardClickHandler)
 
     updateScreen();
 
