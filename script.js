@@ -40,14 +40,14 @@ let gameboard = (function() {
     }
    }
    
-   const resetBoard = () => {
-        createBoard();
-        const startBtn = document.querySelector(".btn-start");
-        startBtn.hidden = false;
-   }
+//    const resetBoard = () => {
+//         createBoard();
+//         const startBtn = document.querySelector(".btn-start");
+//         startBtn.hidden = false;
+//    }
 
 
-   return { getBoard, placeMarker, printBoard, resetBoard, createBoard };
+   return { getBoard, placeMarker, printBoard, createBoard };
 
 
 })();
@@ -135,7 +135,14 @@ const gameController = (function() {
 
     const restartGame  = () => {
         const screenCtrl = Screencontroller();
-        gameboard.resetBoard();
+        const startBtn = document.querySelector(".btn-start");
+        while (players.length > 0) {
+            players.pop();
+        }
+        gameboard.createBoard();
+        startBtn.hidden = false;
+        console.log(players);
+        screenCtrl.updateScreen();
     }
 
 
@@ -171,6 +178,8 @@ function Screencontroller() {
     gameboard.createBoard();
 
     const updateScreen = () => {
+        console.log("PLAYERS", gameController.players)
+        console.log("Current Player", gameController.getCurrentPlayer())
         boardDiv.textContent = "";
         const board = gameboard.getBoard();
         const currentPlayer = gameController.getCurrentPlayer();
