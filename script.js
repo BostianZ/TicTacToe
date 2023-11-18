@@ -5,13 +5,13 @@ let gameboard = (function() {
    let board = [];
   
 
-   for (let i = 0; i < rows; i++) {
-    //creation of each row
-    board[i] = []
-    for (let j = 0; j < columns; j++) {
-        board[i].push(Cell());
-    }
-   }
+//    for (let i = 0; i < rows; i++) {
+//     //creation of each row
+//     board[i] = []
+//     for (let j = 0; j < columns; j++) {
+//         board[i].push(Cell());
+//     }
+//    }
 
    const getBoard = () => board;
 
@@ -27,28 +27,27 @@ let gameboard = (function() {
 
    const printBoard = () => {
     const printedBoard = board.map((row) => row.map((cell) => cell.getValue()))
-    console.log(printedBoard);
     return printedBoard;
    }
-   
-   const restartBoard = () => {
-        //Board contains cell objects with getValue and addMarker methods
-        //We need to change the values within the board and then those values ought
-        //to change within the screencontroller
-       
-        let board = gameboard.getBoard();
-        let newBoard = board.forEach(row => {
-            row.forEach((cell, index) => {
-                cell[index] = Cell();
-            })
-        })
 
-        console.log("NEW BOARD", newBoard);
-        return newBoard;
+   const createBoard = () => {
+    for (let i = 0; i < rows; i++) {
+        //creation of each row
+        board[i] = []
+        for (let j = 0; j < columns; j++) {
+            board[i].push(Cell());
+        }
     }
+   }
+   
+   const resetBoard = () => {
+        createBoard();
+        const startBtn = document.querySelector(".btn-start");
+        startBtn.hidden = false;
+   }
 
 
-   return { getBoard, placeMarker, printBoard, restartBoard };
+   return { getBoard, placeMarker, printBoard, resetBoard, createBoard };
 
 
 })();
@@ -56,7 +55,6 @@ let gameboard = (function() {
 //Game Controller
 const gameController = (function() {
     const form = document.querySelector("form");
-    const startBtn = document.querySelector(".btn-start");
     const restartBtn = document.querySelector(".btn-restart");
     let players = [];
     let currentPlayer; 
@@ -71,18 +69,12 @@ const gameController = (function() {
     const getCurrentPlayer = () => currentPlayer;
 
     const switchPlayer = () => {
-        // currentPlayer = currentPlayer = players[0] ? players[1] : players[0];
         if (currentPlayer === players[0]) {
             currentPlayer = players[1]
         } else if (currentPlayer === players[1]) {
             currentPlayer = players[0]
         }
     }
-    
-    // const printNewRound = () => {
-    //     gameboard.printBoard();
-    //     // console.log(`${getCurrentPlayer().name}'s turn`)
-    // }
 
     const checkForWin = (marker) => {
         const winDiv = document.querySelector(".winner");
@@ -105,33 +97,50 @@ const gameController = (function() {
     }
 
     const playRound = (row, column) => {
-        console.log(currentPlayer);
         const mark = getCurrentPlayer().playerMarker;
         gameboard.placeMarker(row, column, mark);
 
-        checkForWin(mark);
+        if (checkForWin(mark)) {
+            return;
+        }
+
         switchPlayer();
         // printNewRound();
     };
 
+    const startBtnToggle = () => {
+        const startBtn = document.querySelector(".btn-start");
+        startBtn.hidden = true;
+    }
+
     const start = (e) => {
         e.preventDefault();
         const screenCtrl = Screencontroller();
+        
         if (players.length >= 2) {
             return console.log("Already players playing")
         } 
+
         const playerOne = createPlayer(document.querySelector(".player-one").value, "X");
         const playerTwo = createPlayer(document.querySelector(".player-two").value, "O");
 
         players.push(playerOne, playerTwo);
         currentPlayer = players[0];
-        console.log("PLAYERS", players)
+
         form.reset();
         screenCtrl.updateScreen();
+        startBtnToggle();
+
     }
 
-    startBtn.addEventListener("click", start)
-    restartBtn.addEventListener("click", gameboard.restartBoard);
+    const restartGame  = () => {
+        const screenCtrl = Screencontroller();
+        gameboard.resetBoard();
+    }
+
+
+    form.addEventListener("submit", start)
+    restartBtn.addEventListener("click", restartGame);
 
     // printNewRound();
 
@@ -157,33 +166,25 @@ function Cell() {
 
 
 function Screencontroller() {
-
-    //We want to check that the user enters names before they can start the game
-    //People array is 
-    
-    //We want to display the current players name when the game STARTS
-
-    //We then update the currentplayer based on whos turn it is.
-
-    //If a player whens we update the current screen with the winner.
-
-    // const game = Gamecontroller();
     const boardDiv = document.querySelector(".board");
     const currentPlayerDiv = document.querySelector(".current-player");
+    gameboard.createBoard();
 
     const updateScreen = () => {
         boardDiv.textContent = "";
         const board = gameboard.getBoard();
+        const currentPlayer = gameController.getCurrentPlayer();
 
-        if (gameController.players.length !== 0) {
-            currentPlayerDiv.textContent = `${gameController.getCurrentPlayer().playerName}'s turn!`;
-        } 
-    
-        if (gameController.checkForWin(gameController.getCurrentPlayer.playerMarker)) {
-            currentPlayerDiv.textContent = `${gameController.getCurrentPlayer().playerName}'s WINS!`;
+        if (currentPlayer === undefined) {
+            currentPlayerDiv.textContent = "Enter your player names!"
+        
+        } else if (currentPlayer && gameController.checkForWin(currentPlayer.playerMarker)) {
+             currentPlayerDiv.textContent = `${currentPlayer.playerName} WINS!`;
+        } else {
+            currentPlayerDiv.textContent = `${currentPlayer.playerName}'s turn!`;
         }
-
-     
+        
+       
         board.forEach((row, index)=> {
             const rowDiv = document.createElement("div");
             rowDiv.classList.add("board-row");
