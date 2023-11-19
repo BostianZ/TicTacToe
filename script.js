@@ -3,15 +3,6 @@ let gameboard = (function() {
    let rows = 3;
    let columns = 3;
    let board = [];
-  
-
-//    for (let i = 0; i < rows; i++) {
-//     //creation of each row
-//     board[i] = []
-//     for (let j = 0; j < columns; j++) {
-//         board[i].push(Cell());
-//     }
-//    }
 
    const getBoard = () => board;
 
@@ -44,13 +35,6 @@ let gameboard = (function() {
     }
    }
    
-//    const resetBoard = () => {
-//         createBoard();
-//         const startBtn = document.querySelector(".btn-start");
-//         startBtn.hidden = false;
-//    }
-
-
    return { getBoard, placeMarker, printBoard, createBoard };
 
 
@@ -211,7 +195,6 @@ function Screencontroller() {
                 const cellDiv = document.createElement("div");
                 cellDiv.classList.add("cell");
                 cellDiv.dataset.column = index;
-                // cellDiv.textContent = cell.getValue();
                 const markDiv = document.createElement("div");
                 markDiv.classList.add("mark");
                 markDiv.textContent = cell.getValue();
@@ -231,8 +214,6 @@ function Screencontroller() {
         gameController.playRound(row, column);
         updateScreen();
     }
-
-    // boardDiv.addEventListener("click", boardClickHandler)
 
     updateScreen();
 
