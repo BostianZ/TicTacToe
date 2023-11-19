@@ -16,13 +16,17 @@ let gameboard = (function() {
    const getBoard = () => board;
 
  //Where the player places their token ("X" or "O")
-   const placeMarker = (row, column, player) => {
+   const placeMarker = (row, column, mark) => {
+    //If someone has already won, then no reason to continue the abilit to mark;
+    if (gameController.checkForWin(mark)) {
+        return;
+    }
     //We know where the player wants to mark their spot via row and column params.
     //This means we can search the matrix to the spot the player wants to mark
     if (board[row][column].getValue() === "X" || board[row][column].getValue() === "O") {
        return console.log("Spot taken")
     }
-    board[row][column].addMarker(player);
+    board[row][column].addMarker(mark);
    }
 
    const printBoard = () => {
@@ -56,6 +60,7 @@ let gameboard = (function() {
 const gameController = (function() {
     const form = document.querySelector("form");
     const restartBtn = document.querySelector(".btn-restart");
+    const startBtn = document.querySelector(".btn-start");
     let players = [];
     let currentPlayer; 
 
@@ -74,6 +79,12 @@ const gameController = (function() {
         } else if (currentPlayer === players[1]) {
             currentPlayer = players[0]
         }
+    } 
+
+    const checkForTie = () => {
+        let flatBoard = gameboard.printBoard().flat();
+        let tie = flatBoard.every(cell => cell === "X" || cell === "O");
+        return tie;
     }
 
     const checkForWin = (marker) => {
@@ -91,8 +102,8 @@ const gameController = (function() {
         ]
 
         let flatBoard = gameboard.printBoard().flat();
-
-        return win = winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
+  
+        return winConditions.find((condition) => condition.every((index) => flatBoard[index] === marker));
 
     }
 
@@ -105,13 +116,10 @@ const gameController = (function() {
         }
 
         switchPlayer();
-        // printNewRound();
+
     };
 
-    const startBtnToggle = () => {
-        const startBtn = document.querySelector(".btn-start");
-        startBtn.hidden = true;
-    }
+
 
     const start = (e) => {
         e.preventDefault();
@@ -129,19 +137,18 @@ const gameController = (function() {
 
         form.reset();
         screenCtrl.updateScreen();
-        startBtnToggle();
 
+        startBtn.hidden = true;
     }
 
     const restartGame  = () => {
         const screenCtrl = Screencontroller();
-        const startBtn = document.querySelector(".btn-start");
+    
         players = [];
         currentPlayer = players[0];
         gameboard.createBoard();
-        startBtn.hidden = false;
-        console.log(players);
         screenCtrl.updateScreen();
+        startBtn.hidden = false;
     }
 
 
@@ -152,6 +159,7 @@ const gameController = (function() {
         playRound,
         getCurrentPlayer,
         checkForWin,
+        checkForTie,
         players
     }
 })();
@@ -172,23 +180,27 @@ function Cell() {
 function Screencontroller() {
     const boardDiv = document.querySelector(".board");
     const currentPlayerDiv = document.querySelector(".current-player");
+    const playersDiv = document.querySelector(".players");
     gameboard.createBoard();
 
     const updateScreen = () => {
-        console.log("PLAYERS", gameController.players)
-        console.log("Current Player", gameController.getCurrentPlayer())
+
         boardDiv.textContent = "";
         const board = gameboard.getBoard();
         const currentPlayer = gameController.getCurrentPlayer();
-
+        //If no user display enter names text
         if (currentPlayer === undefined) {
             currentPlayerDiv.textContent = "Enter your player names!"
+        //If current player and current player wins, display current player wins
         } else if (currentPlayer && gameController.checkForWin(currentPlayer.playerMarker)) {
-             currentPlayerDiv.textContent = `${currentPlayer.playerName} WINS!`;
+            currentPlayerDiv.textContent = `${currentPlayer.playerName} WINS!`;
+        //If tie display tie
+        } else if (gameController.checkForTie()) {
+            currentPlayerDiv.textContent = "ITS A TIE!";
         } else {
+            //Display current player
             currentPlayerDiv.textContent = `${currentPlayer.playerName}'s turn!`;
         }
-        
        
         board.forEach((row, index)=> {
             const rowDiv = document.createElement("div");
@@ -197,9 +209,13 @@ function Screencontroller() {
             boardDiv.appendChild(rowDiv)
             row.forEach((cell, index) => {
                 const cellDiv = document.createElement("div");
-                cellDiv.classList.add('cell');
+                cellDiv.classList.add("cell");
                 cellDiv.dataset.column = index;
-                cellDiv.textContent = cell.getValue();
+                // cellDiv.textContent = cell.getValue();
+                const markDiv = document.createElement("div");
+                markDiv.classList.add("mark");
+                markDiv.textContent = cell.getValue();
+                cellDiv.appendChild(markDiv);
 
                 cellDiv.addEventListener("click", boardClickHandler)
 

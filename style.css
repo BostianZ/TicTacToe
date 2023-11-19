@@ -19,7 +19,7 @@ body {
     background-color: var(--main-color);
     height: 98vh;
     display: grid;
-    grid-template: 1fr 4fr / 1fr 4fr;
+    grid-template: 1fr 4fr / 2fr 6fr;
     justify-items: center;
 }
 
@@ -69,16 +69,17 @@ input[type=text] {
 
 .cell {
     border: 8px solid white;
-    font-size: 32px;
-    color: white;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
 }
 
 .mark {
     color: white;
     font-weight: 500;
-    font-size: 48px;
+    font-size: 32px;
+    background-color: green;
 }
 
 .buttons {
